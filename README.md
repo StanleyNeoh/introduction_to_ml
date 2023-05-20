@@ -31,6 +31,7 @@ pip install -r requirements.txt
 
 ## Topics covered in this repository
 * Logistic Regression
+* Multilayer Perceptron
 
 
 
