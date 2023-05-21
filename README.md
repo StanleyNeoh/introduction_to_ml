@@ -1,6 +1,6 @@
 # Introduction to ML
 
-This repository is a compilation of PyTorch training scripts for various tasks as I learn the basics of machine learning
+This repository is a compilation of practise scripts and notes as I learn the basics of machine learning
 
 I am referencing the following courses on Coursera:
 * [Introduction to Machine Learning by Duke University](https://www.coursera.org/learn/machine-learning-duke)
