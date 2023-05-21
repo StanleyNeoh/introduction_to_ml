@@ -1,6 +1,6 @@
-# PyTorch Training
+# Introduction to ML
 
-This repository is a compilation of PyTorch training scripts for various tasks as I learn the basics of PyTorch.
+This repository is a compilation of PyTorch training scripts for various tasks as I learn the basics of machine learning
 
 I am referencing the following courses on Coursera:
 * [Introduction to Machine Learning by Duke University](https://www.coursera.org/learn/machine-learning-duke)
@@ -29,9 +29,8 @@ Then, install the required packages:
 pip install -r requirements.txt
 ```
 
-## Topics covered in this repository
-* Logistic Regression
-* Multilayer Perceptron
+## Math Notes
+In my time learning machine learning, I have found that it is very important to understand the math behind the algorithms. I have compiled my notes on the math behind machine learning in the [math](./math/) folder.
 
 
 

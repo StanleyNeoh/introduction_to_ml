@@ -2,4 +2,4 @@
 venv/**
 
 # Data files
-*/data/**
+**/data/**
