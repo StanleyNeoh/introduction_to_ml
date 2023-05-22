@@ -3,7 +3,7 @@
 \usepackage[parfill]{parskip}
 \usepackage{amsmath}
 
-\title{Finding gradients of neural networks}
+\title{Mathematics of Neural Networks}
 \author{Stanley Neoh}
 \date{May 2023}
 
@@ -12,7 +12,7 @@
 \maketitle
 
 \section{Introduction}
-This article aims to cover the basic mathematics of neural networks. neural networks are basically fancy functions with many parameters that aim to fit some set of data. The training of neural networks consists of \emph{forward propagation} where output is produced from a given input and \emph{backward propagation} where the output is compared to its corresponding labels and the parameters are tweaked accordingly to better fit.\\ 
+This article aims to cover the basic mathematics of neural networks. Neural networks are basically fancy functions with many parameters that aim to fit some set of data. The training of neural networks consists of \emph{forward propagation} where output is produced from a given input and \emph{backward propagation} where the output is compared to its corresponding labels and the parameters are tweaked accordingly to better fit.
 
 The most challenging aspect of neural networks for me personally was to stray away from thinking of tensors and vectors as rows and columns. This made it very difficult to calculate the gradients for high dimensional tensors. Hence, this short article aims to establish a set of notations that you may adopt to better understand the mathematics of neural networks.
 
@@ -32,21 +32,21 @@ The inner product of 2 vectors \(u\) and \(v\) can be expressed as:
 
 In `Einstan' notation, the same inner product is expressed as
 
-\[u_iv_i\]
+\[u_Iv_I\]
 
-Notice that the summation sign is omitted. So how do we tell which index to sum across? That's simple, so long as there is a common index shared between 2 tensors \textbf{in a product}, we will sum across it implicitly unless otherwise stated. This is very similar to Einstein's sum notation except that we do not require one of the indexes to be a superscript and the other to be a subscript. Everything is subscript in our notation.
+Notice that the summation sign is omitted. So how do we tell which index to sum across? That's simple, so long as there is a common CAPITALISED index shared between 2 tensors \textbf{in a product}, we will sum across it implicitly unless otherwise stated. This is very similar to Einstein's sum notation except that we do not require one of the indexes to be a superscript and the other to be a subscript. Everything is subscript in our notation.
 
 Let us consider the inner product of a rank-2 tensor \(A = A_{i,j}\) with a rank-1 column vector \(b = b_k\). We could perform the inner-product along the first axis of \(A\) by arranging the \(A\) and \(b\) in the following way:
 
-\[b^TA = A_{k,j}b_k\]
+\[b^TA = A_{K,j}b_K\]
 
 We could also perform the inner-product along the second axis of \(A\) by arranging \(A\) and \(b\) in the following way:
 
-\[Ab = A_{i, k}b_k\]
+\[Ab = A_{i, K}b_K\]
 
 This shows us that the inner product can happen along any single axis between 2 tensors. This can be generalized and expressed in our notation in the following way:
 
-\[A \cdot B = A_{i_1, i_2, \dots, i_a = k, \dots, i_n}B_{j_1, j_2, \dots, j_b = k, \dots, j_m}\]
+\[A \cdot B = A_{i_1, i_2, \dots, i_a = K, \dots, i_n}B_{j_1, j_2, \dots, j_b = K, \dots, j_m}\]
 
 This would mean that the inner product of \(A\) with that of \(B\) happens along the \(a\)-th axis of \(A\) and the \(b\)-th axis of \(B\). Perhaps a higher dimensional being could write it out in the standard matrix notation, but with our limited dimensional thinking, this is probably one of the better options we have.
 
@@ -99,8 +99,8 @@ Let us define \(X\) as a \(l\)-ranked tensor, \(Y = Y(X)\) as a \(m\)-ranked ten
 
 \[\frac{\partial Z}{\partial X} 
 = \frac{\partial Z_{k_1, \dots, k_n}}{\partial X_{i_1, \dots, i_l}} \\
-= \frac{\partial Z_{k_1, \dots, k_n}}{\partial Y_{j_1, \dots, j_m}}
-\frac{\partial Y_{j_1, \dots, j_m}}{\partial X_{i_1, \dots, i_l}}
+= \frac{\partial Z_{k_1, \dots, k_n}}{\partial Y_{J_1, \dots, J_m}}
+\frac{\partial Y_{J_1, \dots, J_m}}{\partial X_{i_1, \dots, i_l}}
 \]
 
 Here our notation says to sum across every unique tuple \((j_1, j_2, \dots, j_m)\) for every tuple \((k_1, \dots, k_n, i_1, \dots, i_l)\). 
@@ -108,69 +108,96 @@ Here our notation says to sum across every unique tuple \((j_1, j_2, \dots, j_m)
 Let's test this with the following example. Let \(W_{i,j} = W_{i, j}(x)\) be a rank-2 tensor, \(f = f(W_{i, j})\) be a scalar-valued function. Then,
 
 \[ \frac{df}{dW} = \sum_{i=1}^n \sum_{j=1}^m \frac{\partial f}{\partial W_{i, j}} \frac{dW_{i, j}}{dx}
-= \frac{\partial f}{\partial W_{i, j}} \frac{dW_{i, j}}{dx} 
+= \frac{\partial f}{\partial W_{I, J}} \frac{dW_{I, J}}{dx} 
 \]
 
 Hopefully, the above example shows how the notation can be understood and applied. And with that, we are now ready to get our hands dirty and tackle the mathematics of neural networks.
 
 \section{Finding gradients of neural networks}
 
-For simplicity, let's consider a 2-layer neural network. Given \begin{quote}
-    \((n, m)\)-matrix \(X\) as the input,
-    
-    \((m, k)\)-matrix \(W^{(1)}\) as layer-1 weights,
-    
-    \((n, k)\)-matrix \(b^{(1)}\) as layer-1 bias,
+Given \((b, k_{m-1})\)-matrix \(X^{(m-1)}\), let us define the function \(F^{(m)}(X^{(m-1)}) = X^{(m)}\)  such that
+    \[Z^{(m)}_{i, j} = X^{(m-1)}_{i, K} W^{(m)}_{K, j} + b^{(m)}_j\]
+    \[X^{(m)}_{i, j} = \sigma_m(Z^{(m)}_{i, j})\]
+where \begin{quote}
+    \(X^{(m)}, Z^{(m)}\) are \((b, k_m)\)-tensors,
 
-    \((k, l)\)-matrix \(W^{(2)}\) as layer-2 weights,
+    \(W^{(m)}\) is a \((k_{m-1}, k_m)\)-matrix,
     
-    \((n, l)\)-matrix \(b^{(2)}\) as layer-2 bias,
-
-    \(\sigma_1\) is the activation function for layer-1,
+    \(b^{(m)}\) is a \((b, k_m)\)-matrix, and
     
-    \(\sigma_2\) is the activation function for layer-2,
-
-    \((n, l)\)-matrix \(\hat{Y}\) as the labels,
-
-    \(E = E(\hat{Y}, Y)\) be the error function
-    
+    \(\sigma_m\) is the activation function for layer-m.
 \end{quote}
 
-\[Y^{(1)}_{i, j} = X_{i, k} W^{(1)}_{k, j} + b^{(1)}_j\]
-\[\hat{Y}^{(1)}_{i, j} = \sigma_1(Y^{(1)})\]
-\[Y^{(2)}_{i, j} = \hat{Y}^{(1)}_{i, k} W^{(2)}_{k, j} + b^{(2)}_j\]
-\[Y_{i, j} = \sigma_2(Y^{(2)}_{i, j})\]
-\[E = E(\hat{Y}, Y)\]
+A \(n\)-layer neural network given an input \((b, k_0)\)-matrix \(X^{(0)}\) will give \(X^{(n)}\) such that
+    \[X^{(1)} = F^{(1)}(X^{(0)})\]
+    \[X^{(2)} = F^{(2)}(X^{(1)})\]
+    \[\vdots\]
+    \[X^{(n)} = F^{(n)}(X^{(n-1)})\]
 
-We can see that:
-\[\frac{\partial E}{\partial W^{(2)}_{i, j}} 
-= \frac{\partial E}{\partial Y_{a,b}}
-\frac{\partial Y_{a, b}}{\partial Y^{(2)}_{c, d}}
-\frac{\partial Y^{(2)}_{c, d}}{\partial W^{(2)}_{i, j}}
+Let us also define the labels to be the \((b, k_n)\)-tensor \(\hat{X}^{(n)}\) and the loss function to be \(L(\hat{X}^{(n)}, X^{(n)})\).
+
+For \(1 \le m \le n\), as \(\sigma_m\) is applied to a single observation at a time,
+
+\[X^{(m)}_{i, j} = X^{(m)}_{i, j}(Z^{(m)}_{i, K}), 1 \le K \le k_m\]  
+\[\Rightarrow \forall p \neq q, 
+\frac{\partial X^{(m)}_{p,b}}{\partial Z^{(m)}_{q,j}} = 0
 \]
 
-\[\frac{\partial E}{\partial b^{(2)}_i} 
-= \frac{\partial E}{\partial Y_{a,b}}
-\frac{\partial Y_{a, b}}{\partial Y^{(2)}_{c, d}}
-\frac{\partial Y^{(2)}_{c, d}}{\partial b^{(2)}_i}
+Based on the definition \(Z^{(m)}\),
+\[Z^{(m)}_{i, j} = Z^{(m)}_{i, j}(X^{(m)}_{i, K}, W^{(m)}_{K, j}, b^{(m)}_j), 1 \le K \le k_m
+\]
+\[\Rightarrow \forall p \neq q, 
+\frac{\partial Z^{(m)}_{p,b}}{\partial X^{(m)}_{q,j}} = 0, 
+\frac{\partial Z^{(m)}_{a,p}}{\partial W^{(m)}_{i,q}} = 0,
+\frac{\partial Z^{(m)}_{a,p}}{\partial b^{(m)}_q} = 0
 \]
 
-\[\frac{\partial E}{\partial W^{(1)}_{i, j}} 
-= \frac{\partial E}{\partial Y_{a,b}}
-\frac{\partial Y_{a, b}}{\partial Y^{(2)}_{c, d}}
-\frac{\partial Y^{(2)}_{c, d}}{\partial \hat{Y}^{(1)}_{e,f}}
-\frac{\partial \hat{Y}^{(1)}_{e,f}}{\partial Y^{(1)}_{g,h}}
-\frac{\partial Y^{(1)}_{g,h}}{\partial W^{(1)}_{i, j}}
+Hence, this gives us the followin formulas and simplifications
+\[
+\frac{\partial L}{\partial Z^{(n)}_{i,j}}
+= \frac{\partial L}{\partial X^{(n)}_{A,B}}
+\frac{\partial X^{(n)}_{A,B}}{\partial Z^{(n)}_{i,j}}
+= \frac{\partial L}{\partial X^{(n)}_{A,B}}
+\frac{\partial X^{(n)}_{A,B}}{\partial Z^{(n)}_{i,j}}
+\delta_{i, A}  
+= \frac{\partial L}{\partial X^{(n)}_{i,B}}
+\frac{\partial X^{(n)}_{i,B}}{\partial Z^{(n)}_{i,j}}
+\]
+\[\frac{\partial L}{\partial Z^{(m-1)}_{i, j}} 
+= \frac{\partial L}{\partial Z^{(m)}_{A, B}}
+\frac{\partial Z^{(m)}_{A, B}}{\partial X^{(m-1)}_{i, j}}
+= \frac{\partial L}{\partial Z^{(m)}_{A, B}}
+\frac{\partial Z^{(m)}_{A, B}}{\partial X^{(m-1)}_{i, j}}
+\delta_{i, A}
+= \frac{\partial L}{\partial Z^{(m)}_{i, B}}
+\frac{\partial Z^{(m)}_{i, B}}{\partial X^{(m-1)}_{i, j}}
+= \frac{\partial L}{\partial Z^{(m)}_{i, B}} W^{(m)}_{j, B}
+\]
+\[\frac{\partial L}{\partial W^{(m)}_{i, j}} 
+= \frac{\partial L}{\partial Z^{(m)}_{A, B}}
+\frac{\partial Z^{(m)}_{A, B}}{\partial W^{(m)}_{i, j}}
+= \frac{\partial L}{\partial Z^{(m)}_{A, B}}
+\frac{\partial Z^{(m)}_{A, B}}{\partial W^{(m)}_{i, j}}
+\delta_{j, B}
+= \frac{\partial L}{\partial Z^{(m)}_{A, j}}
+\frac{\partial Z^{(m)}_{A, j}}{\partial W^{(m)}_{i, j}}
+= \frac{\partial L}{\partial Z^{(m)}_{A, B}}X^{(m-1)}_{A, i}
+\]
+\[\frac{\partial L}{\partial b^{(m)}_{i}} 
+= \frac{\partial L}{\partial Z^{(m)}_{A, B}}
+\frac{\partial Z^{(m)}_{A, B}}{\partial b^{(m)}_{i}}
+= \frac{\partial L}{\partial Z^{(m)}_{A, B}}
+\frac{\partial Z^{(m)}_{A, B}}{\partial b^{(m)}_{i}}
+\delta_{i, B}
+= \frac{\partial L}{\partial Z^{(m)}_{A, i}}
+\frac{\partial Z^{(m)}_{A, i}}{\partial b^{(m)}_{i}}
+= \frac{\partial L}{\partial Z^{(m)}_{A, i}} (1)_A
 \]
 
-\[\frac{\partial E}{\partial b^{(1)}_i} 
-= \frac{\partial E}{\partial Y_{a,b}}
-\frac{\partial Y_{a, b}}{\partial Y^{(2)}_{c, d}}
-\frac{\partial Y^{(2)}_{c, d}}{\partial \hat{Y}^{(1)}_{e,f}}
-\frac{\partial \hat{Y}^{(1)}_{e,f}}{\partial Y^{(1)}_{g,h}}
-\frac{\partial Y^{(1)}_{g,h}}{\partial b^{(1)}_i}
-\]
+Finally, finding the gradients with respect to parameters is somewhat more digestible now. Before we we perform back propagation, let us first explore the algorithm that will be employed. 
 
-This is still very complicated but at least we can begin to know what needs to be iterated through to calculate the gradients. In the next article, we will show how we can use these gradients to perform backpropagation and how we can cache gradients to improve efficiency.
+\section{Newton Rhapson's Method}
+
+To be continued
 
 \end{document}
